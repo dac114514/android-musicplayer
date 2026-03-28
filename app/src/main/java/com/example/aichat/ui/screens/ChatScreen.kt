@@ -420,7 +420,6 @@ fun ChatScreen(
                                             inputText = ""
                                             keyboardController?.hide()
                                             // Auto-scroll after sending
-                                            scrollToBottom()
                                         }
                                     }
                                 ),
@@ -449,7 +448,6 @@ fun ChatScreen(
                                         inputText = ""
                                         keyboardController?.hide()
                                         // Auto-scroll after sending
-                                        scrollToBottom()
                                     }
                                 },
                                 enabled = inputText.isNotBlank() && !uiState.isLoading,
