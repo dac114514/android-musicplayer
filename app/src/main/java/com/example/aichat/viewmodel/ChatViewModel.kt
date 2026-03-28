@@ -55,7 +55,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             val userMsg = ChatMessage(role = "user", content = userText.trim())
             _messages.update { it + userMsg }
             val assistantId = System.currentTimeMillis() + 1
-            _messages.update { it + ChatMessage(id = assistantId, role = "assistant", content = "") }
+            val assistantMsg = ChatMessage(id = assistantId, role = "assistant", content = "", modelName = settings.value.model)
+            _messages.update { it + assistantMsg }
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val s = settings.value
@@ -135,13 +136,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { prefsRepo.saveReasoningEffort(effort) }
     }
 
-    /** 保存当前对话到历史，开始新对话，重置 conversationId */
+    /** 新建对话：清空消息列表并生成新 ID，不自动保存旧对话 */
     fun newConversation() {
-        viewModelScope.launch {
-            prefsRepo.saveConversation(_messages.value, currentConversationId)
-            _messages.value = emptyList()
-            currentConversationId = System.currentTimeMillis()  // 新对话新ID
-        }
+        _messages.value = emptyList()
+        currentConversationId = System.currentTimeMillis()  // 新对话新ID
     }
 
     /** 从历史恢复对话，使用该历史条目的 ID，后续追加的消息保存回同一条 */

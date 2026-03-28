@@ -56,9 +56,16 @@ fun ChatScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    LaunchedEffect(messages.size) {
+    // Auto-scroll to bottom when new messages arrive or on manual scroll request
+    fun scrollToBottom() {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            scrollToBottom()
         }
     }
 
@@ -268,14 +275,14 @@ fun ChatScreen(
                                     message = msg,
                                     fontSizePx = fontSizePx,
                                     colorScheme = MaterialTheme.colorScheme,
-                                    modelName = settings.model,
+                                    modelName = msg.modelName ?: settings.model,
                                     isLoading = uiState.isLoading && msg.role == "assistant" && msg.content.isBlank()
                                 )
                             }
                         }
                     }
 
-                    // Error message overlay
+                    // Error message overlay - click to expand full error
                     if (uiState.error != null) {
                         Card(
                             modifier = Modifier
@@ -286,36 +293,47 @@ fun ChatScreen(
                                 containerColor = MaterialTheme.colorScheme.errorContainer
                             )
                         ) {
-                            Row(
+                            Column(
                                 modifier = Modifier
                                     .clickable { viewModel.clearError() }
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(12.dp)
                             ) {
-                                Icon(
-                                    Icons.Default.Error,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Error,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "点击查看详情",
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    IconButton(
+                                        onClick = { viewModel.clearError() },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = "关闭",
+                                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     uiState.error ?: "",
                                     color = MaterialTheme.colorScheme.onErrorContainer,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f)
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                                IconButton(
-                                    onClick = { viewModel.clearError() },
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Close,
-                                        contentDescription = "关闭",
-                                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
                             }
                         }
                     }
@@ -407,6 +425,8 @@ fun ChatScreen(
                                             viewModel.sendMessage(trimmedText)
                                             inputText = ""
                                             keyboardController?.hide()
+                                            // Auto-scroll after sending
+                                            scrollToBottom()
                                         }
                                     }
                                 ),
@@ -434,6 +454,8 @@ fun ChatScreen(
                                         viewModel.sendMessage(trimmedText)
                                         inputText = ""
                                         keyboardController?.hide()
+                                        // Auto-scroll after sending
+                                        scrollToBottom()
                                     }
                                 },
                                 enabled = inputText.isNotBlank() && !uiState.isLoading,

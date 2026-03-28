@@ -39,7 +39,12 @@ data class ConversationSnapshot(
 )
 
 @Serializable
-data class SerializableMessage(val id: Long, val role: String, val content: String)
+data class SerializableMessage(
+    val id: Long,
+    val role: String,
+    val content: String,
+    val modelName: String? = null
+)
 
 class PreferencesRepository(private val context: Context) {
 
@@ -109,7 +114,14 @@ class PreferencesRepository(private val context: Context) {
         val snapshot = ConversationSnapshot(
             id       = conversationId,   // 使用稳定 ID，不再每次 currentTimeMillis
             title    = title,
-            messages = messages.map { SerializableMessage(it.id, it.role, it.content) }
+            messages = messages.map {
+                SerializableMessage(
+                    id = it.id,
+                    role = it.role,
+                    content = it.content,
+                    modelName = it.modelName
+                )
+            }
         )
         context.dataStore.edit { prefs ->
             val existing = try {

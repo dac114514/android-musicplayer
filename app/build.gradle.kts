@@ -22,8 +22,8 @@ android {
         applicationId = "com.faster.aichat"
         minSdk = 24          // Updated for mobile compatibility (Android 7.0+)
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

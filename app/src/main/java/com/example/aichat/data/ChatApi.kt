@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit
 data class ChatMessage(
     val id: Long = System.currentTimeMillis(),
     val role: String,
-    val content: String
+    val content: String,
+    val modelName: String? = null
 )
 
 class ChatApi {
