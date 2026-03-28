@@ -56,16 +56,10 @@ fun ChatScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    // Auto-scroll to bottom when new messages arrive or on manual scroll request
-    fun scrollToBottom() {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
-        }
-    }
-
+    // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
-            scrollToBottom()
+            listState.animateScrollToItem(messages.size - 1)
         }
     }
 
